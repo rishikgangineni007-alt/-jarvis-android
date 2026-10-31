@@ -23,6 +23,27 @@ jobs:
       - name: Extract project ZIP
         run: unzip JARVIS_GitHub_Build_Ready.zip
 
+      - name: Fix Java and Kotlin JVM targets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("JARVIS_Android_Project/app/build.gradle.kts")
+          s = p.read_text()
+          s = s.replace(
+              "android {",
+              """android {
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = "17"
+              }""",
+              1
+          )
+          p.write_text(s)
+          PY
+
       - name: Accept Android SDK licences and install SDK
         run: |
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
